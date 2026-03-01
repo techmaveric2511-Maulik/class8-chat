@@ -1,189 +1,126 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Class 8 Discord Pro</title>
-<style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #36393f;
-  color: white;
-}
-
-.container {
-  display: flex;
-  height: 100vh;
-}
-
-.sidebar {
-  width: 220px;
-  background: #2f3136;
-  padding: 15px;
-}
-
-.sidebar h3 {
-  margin-top: 20px;
-  cursor: pointer;
-}
-
-.main {
-  flex: 1;
-  padding: 20px;
-}
-
-.people {
-  width: 200px;
-  background: #202225;
-  padding: 10px;
-}
-
-.user {
-  padding: 5px;
-  cursor: pointer;
-}
-
-.green-dot {
-  height: 8px;
-  width: 8px;
-  background-color: #43b581;
-  border-radius: 50%;
-  display: inline-block;
-  margin-left: 5px;
-}
-
-input {
-  padding: 8px;
-  margin: 5px;
-}
-
-button {
-  padding: 8px;
-  background: #5865f2;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-#loginPage {
-  text-align: center;
-  margin-top: 100px;
-}
-
-#chatPage {
-  display: none;
-}
-</style>
+  <title>Class 8 Discord Firebase</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+  <style>
+    body { margin:0; font-family:Arial; background:#36393f; color:white;}
+    .container { display:flex; height:100vh;}
+    .sidebar { width:200px; background:#2f3136; padding:15px;}
+    .main { flex:1; padding:20px;}
+    .people { width:200px; background:#202225; padding:10px;}
+    input { padding:8px; margin:5px;}
+    button { padding:8px; background:#5865f2; color:white; border:none;}
+    .green-dot { height:8px; width:8px; background:#43b581; border-radius:50%; display:inline-block;}
+  </style>
 </head>
-
 <body>
 
-<div id="loginPage">
-<h1>Class 8 Discord Pro</h1>
-<input id="username" placeholder="Enter Name"><br>
-<input id="code" placeholder="Enter Code"><br>
-<button onclick="login()">Login</button>
+<div id="login">
+  <h2>Login</h2>
+  <input id="email" placeholder="Email"><br>
+  <input id="password" type="password" placeholder="Password"><br>
+  <button onclick="register()">Register</button>
+  <button onclick="loginUser()">Login</button>
 </div>
 
-<div id="chatPage">
-<div class="container">
-
-<div class="sidebar">
-<h2>Sections</h2>
-<h3 onclick="changeSection('Home')">Home</h3>
-<h3 onclick="changeSection('Classwork')">Classwork</h3>
-<h3 onclick="changeSection('Study Doubts')">Study Doubts</h3>
-<h3 onclick="changeSection('Memes')">Memes</h3>
-<h3 onclick="changeSection('Gamer Page')">Gamer Page</h3>
-</div>
-
-<div class="main">
-<h2 id="sectionTitle">Home</h2>
-<div id="messages"></div>
-<input id="msgInput" placeholder="Type message">
-<button onclick="sendMessage()">Send</button>
-</div>
-
-<div class="people">
-<h3>People Online</h3>
-<div id="userList"></div>
-</div>
-
-</div>
+<div id="chat" style="display:none;">
+  <div class="container">
+    <div class="sidebar">
+      <h3>Home</h3>
+      <h3>Classwork</h3>
+      <h3>Study Doubts</h3>
+      <h3>Memes</h3>
+      <h3>Gamer Page</h3>
+    </div>
+    <div class="main">
+      <div id="messages"></div>
+      <input id="msg">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+    <div class="people">
+      <h4>Online Users</h4>
+      <div id="users"></div>
+    </div>
+  </div>
 </div>
 
 <script>
-let currentUser = "";
-let isAdmin = false;
-let users = [];
-let bannedUsers = [];
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-function login(){
-  let name = document.getElementById("username").value;
-  let code = document.getElementById("code").value;
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyArbnk6rVI_wRPQibYx1DRKUlEJr19JQ_w",
+  authDomain: "class8-discord-acfcf.firebaseapp.com",
+  projectId: "class8-discord-acfcf",
+  storageBucket: "class8-discord-acfcf.firebasestorage.app",
+  messagingSenderId: "1017298929493",
+  appId: "1:1017298929493:web:15c30c79b46a020dbbd1dc",
+  measurementId: "G-XEVRSZVM66"
+};
 
-  if(bannedUsers.includes(name)){
-    alert("You are banned.");
-    return;
-  }
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+};
 
-  if(name === "PrincipalMaulik" && code === "CLASS8-ADMIN-999"){
-    isAdmin = true;
-    alert("Admin Login Successful");
-  } else if(code !== "CLASS8ONLY"){
-    alert("Wrong Code!");
-    return;
-  }
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-  currentUser = name;
-  users.push(name);
-  updateUserList();
-
-  document.getElementById("loginPage").style.display = "none";
-  document.getElementById("chatPage").style.display = "block";
+function register(){
+  auth.createUserWithEmailAndPassword(
+    email.value, password.value
+  );
 }
+
+function loginUser(){
+  auth.signInWithEmailAndPassword(
+    email.value, password.value
+  );
+}
+
+auth.onAuthStateChanged(user=>{
+  if(user){
+    login.style.display="none";
+    chat.style.display="block";
+
+    db.collection("onlineUsers").doc(user.uid).set({
+      email:user.email
+    });
+
+    db.collection("messages")
+      .orderBy("time")
+      .onSnapshot(snapshot=>{
+        messages.innerHTML="";
+        snapshot.forEach(doc=>{
+          messages.innerHTML += "<p>"+doc.data().text+"</p>";
+        });
+      });
+
+    db.collection("onlineUsers")
+      .onSnapshot(snapshot=>{
+        users.innerHTML="";
+        snapshot.forEach(doc=>{
+          users.innerHTML += "<div>"+doc.data().email+" <span class='green-dot'></span></div>";
+        });
+      });
+  }
+});
 
 function sendMessage(){
-  let msg = document.getElementById("msgInput").value;
-  if(msg === "") return;
-
-  let messageBox = document.getElementById("messages");
-  let p = document.createElement("p");
-  p.innerHTML = "<b>" + currentUser + ":</b> " + msg;
-  messageBox.appendChild(p);
-
-  document.getElementById("msgInput").value = "";
-
-  alert("🔔 New message notification!");
-}
-
-function changeSection(section){
-  document.getElementById("sectionTitle").innerText = section;
-}
-
-function updateUserList(){
-  let list = document.getElementById("userList");
-  list.innerHTML = "";
-
-  users.forEach(user=>{
-    if(!bannedUsers.includes(user)){
-      let div = document.createElement("div");
-      div.className = "user";
-      div.innerHTML = user + "<span class='green-dot'></span>";
-      
-      div.oncontextmenu = function(e){
-        e.preventDefault();
-        if(isAdmin){
-          if(confirm("Ban " + user + "?")){
-            bannedUsers.push(user);
-            alert(user + " banned.");
-            updateUserList();
-          }
-        }
-      };
-
-      list.appendChild(div);
-    }
+  db.collection("messages").add({
+    text: auth.currentUser.email + ": " + msg.value,
+    time: Date.now()
   });
+  msg.value="";
 }
 </script>
 
