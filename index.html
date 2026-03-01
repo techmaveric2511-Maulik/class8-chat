@@ -116,31 +116,6 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 const ADMIN_EMAIL = "170347@maulikdpsgfaridabad.com";
-  if(auth.currentUser.email===ADMIN_EMAIL){
-    userDiv.oncontextmenu=function(e){
-        e.preventDefault();
-        let newWarnings=data.warnings+1;
-        db.collection("onlineUsers").doc(doc.id).update({
-            warnings:newWarnings
-        });
-
-        if(newWarnings>=3){
-            db.collection("bannedUsers").doc(doc.id).set({
-                email:data.email
-            });
-            db.collection("onlineUsers").doc(doc.id).delete();
-            alert("User permanently banned.");
-        }
-    };
-}
-  if(auth.currentUser.email===ADMIN_EMAIL){
-    let del=document.createElement("span");
-    del.innerText=" [Delete]";
-    del.className="admin-delete";
-    del.onclick=()=>db.collection("messages").doc(doc.id).delete();
-    div.appendChild(del);
-}
-
 function acceptAgreement(){
   agreementPopup.style.display = "none";
   loginDiv.style.display = "block";
@@ -200,7 +175,23 @@ auth.onAuthStateChanged(user => {
           messages.appendChild(div);
         });
       });
+if(auth.currentUser.email===ADMIN_EMAIL){
+    userDiv.oncontextmenu=function(e){
+        e.preventDefault();
+        let newWarnings=data.warnings+1;
+        db.collection("onlineUsers").doc(doc.id).update({
+            warnings:newWarnings
+        });
 
+        if(newWarnings>=3){
+            db.collection("bannedUsers").doc(doc.id).set({
+                email:data.email
+            });
+            db.collection("onlineUsers").doc(doc.id).delete();
+            alert("User permanently banned.");
+        }
+    };
+}
   } else {
     chatDiv.style.display = "none";
   }
