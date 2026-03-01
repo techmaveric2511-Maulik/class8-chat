@@ -1,129 +1,189 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Class 8 Private Chat</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background-color: #36393f;
-      color: white;
-    }
+<title>Class 8 Discord Pro</title>
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #36393f;
+  color: white;
+}
 
-    .login, .chat-container {
-      text-align: center;
-      padding: 30px;
-    }
+.container {
+  display: flex;
+  height: 100vh;
+}
 
-    input {
-      padding: 10px;
-      margin: 5px;
-      border-radius: 5px;
-      border: none;
-    }
+.sidebar {
+  width: 220px;
+  background: #2f3136;
+  padding: 15px;
+}
 
-    button {
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      background-color: #5865f2;
-      color: white;
-      cursor: pointer;
-    }
+.sidebar h3 {
+  margin-top: 20px;
+  cursor: pointer;
+}
 
-    .chat-layout {
-      display: flex;
-      height: 100vh;
-    }
+.main {
+  flex: 1;
+  padding: 20px;
+}
 
-    .sidebar {
-      width: 200px;
-      background-color: #2f3136;
-      padding: 20px;
-    }
+.people {
+  width: 200px;
+  background: #202225;
+  padding: 10px;
+}
 
-    .main-chat {
-      flex: 1;
-      padding: 20px;
-    }
+.user {
+  padding: 5px;
+  cursor: pointer;
+}
 
-    .admin-panel {
-      margin-top: 20px;
-      background-color: #202225;
-      padding: 10px;
-      border-radius: 10px;
-    }
-  </style>
+.green-dot {
+  height: 8px;
+  width: 8px;
+  background-color: #43b581;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 5px;
+}
+
+input {
+  padding: 8px;
+  margin: 5px;
+}
+
+button {
+  padding: 8px;
+  background: #5865f2;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+#loginPage {
+  text-align: center;
+  margin-top: 100px;
+}
+
+#chatPage {
+  display: none;
+}
+</style>
 </head>
+
 <body>
 
-<div class="login" id="loginPage">
-  <h1>Class 8 Private Discord</h1>
-  <input type="text" id="name" placeholder="Enter Name"><br>
-  <input type="text" id="number" placeholder="Phone Number"><br>
-  <input type="password" id="code" placeholder="Enter Class Code"><br>
-  <button onclick="login()">Join</button>
+<div id="loginPage">
+<h1>Class 8 Discord Pro</h1>
+<input id="username" placeholder="Enter Name"><br>
+<input id="code" placeholder="Enter Code"><br>
+<button onclick="login()">Login</button>
 </div>
 
-<div class="chat-container" id="chatPage" style="display:none;">
-  <div class="chat-layout">
-    <div class="sidebar">
-      <h3>Private Room</h3>
-      <p>Class 8 Chat</p>
-    </div>
+<div id="chatPage">
+<div class="container">
 
-    <div class="main-chat">
-      <h2 id="welcome"></h2>
+<div class="sidebar">
+<h2>Sections</h2>
+<h3 onclick="changeSection('Home')">Home</h3>
+<h3 onclick="changeSection('Classwork')">Classwork</h3>
+<h3 onclick="changeSection('Study Doubts')">Study Doubts</h3>
+<h3 onclick="changeSection('Memes')">Memes</h3>
+<h3 onclick="changeSection('Gamer Page')">Gamer Page</h3>
+</div>
 
-      <div id="adminControls" class="admin-panel" style="display:none;">
-        <h3>Admin Panel</h3>
-        <button onclick="warnUser()">Give Warning</button>
-        <button onclick="banUser()">Ban User</button>
-        <p id="warningCount"></p>
-      </div>
-    </div>
-  </div>
+<div class="main">
+<h2 id="sectionTitle">Home</h2>
+<div id="messages"></div>
+<input id="msgInput" placeholder="Type message">
+<button onclick="sendMessage()">Send</button>
+</div>
+
+<div class="people">
+<h3>People Online</h3>
+<div id="userList"></div>
+</div>
+
+</div>
 </div>
 
 <script>
-let warnings = 0;
 let currentUser = "";
+let isAdmin = false;
+let users = [];
+let bannedUsers = [];
 
 function login(){
-  let name = document.getElementById("name").value;
-  let number = document.getElementById("number").value;
+  let name = document.getElementById("username").value;
   let code = document.getElementById("code").value;
 
-  if(code !== "CLASS8ONLY"){
-    alert("Access Denied. Class 8 Only!");
+  if(bannedUsers.includes(name)){
+    alert("You are banned.");
     return;
   }
 
-  alert("Welcome! A text message has been sent to " + number);
+  if(name === "PrincipalMaulik" && code === "CLASS8-ADMIN-999"){
+    isAdmin = true;
+    alert("Admin Login Successful");
+  } else if(code !== "CLASS8ONLY"){
+    alert("Wrong Code!");
+    return;
+  }
 
   currentUser = name;
+  users.push(name);
+  updateUserList();
 
   document.getElementById("loginPage").style.display = "none";
   document.getElementById("chatPage").style.display = "block";
-  document.getElementById("welcome").innerText = "Welcome " + name + "!";
-
-  if(name === "Admin" && code === "ADMIN123"){
-    document.getElementById("adminControls").style.display = "block";
-  }
 }
 
-function warnUser(){
-  warnings++;
-  document.getElementById("warningCount").innerText = 
-    "Warnings: " + warnings + "/3";
+function sendMessage(){
+  let msg = document.getElementById("msgInput").value;
+  if(msg === "") return;
 
-  if(warnings >= 3){
-    alert("User has been banned.");
-  }
+  let messageBox = document.getElementById("messages");
+  let p = document.createElement("p");
+  p.innerHTML = "<b>" + currentUser + ":</b> " + msg;
+  messageBox.appendChild(p);
+
+  document.getElementById("msgInput").value = "";
+
+  alert("🔔 New message notification!");
 }
 
-function banUser(){
-  alert("User banned by Admin.");
+function changeSection(section){
+  document.getElementById("sectionTitle").innerText = section;
+}
+
+function updateUserList(){
+  let list = document.getElementById("userList");
+  list.innerHTML = "";
+
+  users.forEach(user=>{
+    if(!bannedUsers.includes(user)){
+      let div = document.createElement("div");
+      div.className = "user";
+      div.innerHTML = user + "<span class='green-dot'></span>";
+      
+      div.oncontextmenu = function(e){
+        e.preventDefault();
+        if(isAdmin){
+          if(confirm("Ban " + user + "?")){
+            bannedUsers.push(user);
+            alert(user + " banned.");
+            updateUserList();
+          }
+        }
+      };
+
+      list.appendChild(div);
+    }
+  });
 }
 </script>
 
