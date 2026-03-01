@@ -56,6 +56,7 @@
       <li>No inappropriate content</li>
       <li>No sharing personal information</li>
       <li>Admin has full moderation rights</li>
+      <li>You understand this platform is intended for students and you have to follow the rules.</li>
     </ul>
     <button onclick="acceptAgreement()">I Agree</button>
   </div>
@@ -114,7 +115,31 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-const ADMIN_EMAIL = "yourrealemail@gmail.com"; // change this
+const ADMIN_EMAIL = "170347@maulikdpsgfaridabad.com";
+  if(auth.currentUser.email===ADMIN_EMAIL){
+    userDiv.oncontextmenu=function(e){
+        e.preventDefault();
+        let newWarnings=data.warnings+1;
+        db.collection("onlineUsers").doc(doc.id).update({
+            warnings:newWarnings
+        });
+
+        if(newWarnings>=3){
+            db.collection("bannedUsers").doc(doc.id).set({
+                email:data.email
+            });
+            db.collection("onlineUsers").doc(doc.id).delete();
+            alert("User permanently banned.");
+        }
+    };
+}
+  if(auth.currentUser.email===ADMIN_EMAIL){
+    let del=document.createElement("span");
+    del.innerText=" [Delete]";
+    del.className="admin-delete";
+    del.onclick=()=>db.collection("messages").doc(doc.id).delete();
+    div.appendChild(del);
+}
 
 function acceptAgreement(){
   agreementPopup.style.display = "none";
