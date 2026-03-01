@@ -2,9 +2,6 @@
 <html>
 <head>
   <title>Class 8 Discord Firebase</title>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
   <style>
     body { margin:0; font-family:Arial; background:#36393f; color:white;}
     .container { display:flex; height:100vh;}
@@ -12,21 +9,22 @@
     .main { flex:1; padding:20px;}
     .people { width:200px; background:#202225; padding:10px;}
     input { padding:8px; margin:5px;}
-    button { padding:8px; background:#5865f2; color:white; border:none;}
+    button { padding:8px; background:#5865f2; color:white; border:none; cursor:pointer;}
     .green-dot { height:8px; width:8px; background:#43b581; border-radius:50%; display:inline-block;}
   </style>
 </head>
 <body>
 
-<div id="login">
-  <h2>Login</h2>
+<div id="loginDiv">
+  <h2>Class 8 Login</h2>
   <input id="email" placeholder="Email"><br>
   <input id="password" type="password" placeholder="Password"><br>
   <button onclick="register()">Register</button>
   <button onclick="loginUser()">Login</button>
+  <p id="errorMsg" style="color:red;"></p>
 </div>
 
-<div id="chat" style="display:none;">
+<div id="chatDiv" style="display:none;">
   <div class="container">
     <div class="sidebar">
       <h3>Home</h3>
@@ -34,20 +32,43 @@
       <h3>Study Doubts</h3>
       <h3>Memes</h3>
       <h3>Gamer Page</h3>
+      <button onclick="logout()">Logout</button>
     </div>
+
     <div class="main">
       <div id="messages"></div>
-      <input id="msg">
+      <input id="msgInput" placeholder="Type message">
       <button onclick="sendMessage()">Send</button>
     </div>
+
     <div class="people">
       <h4>Online Users</h4>
-      <div id="users"></div>
+      <div id="usersList"></div>
     </div>
   </div>
 </div>
 
-<script>
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { 
+  getAuth, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  onAuthStateChanged,
+  signOut 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  onSnapshot, 
+  query, 
+  orderBy,
+  setDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
@@ -69,59 +90,90 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
+
 };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-function register(){
-  auth.createUserWithEmailAndPassword(
-    email.value, password.value
-  );
-}
+const loginDiv = document.getElementById("loginDiv");
+const chatDiv = document.getElementById("chatDiv");
+const errorMsg = document.getElementById("errorMsg");
 
-function loginUser(){
-  auth.signInWithEmailAndPassword(
-    email.value, password.value
-  );
-}
+window.register = async function() {
+  try {
+    await createUserWithEmailAndPassword(
+      auth,
+      email.value,
+      password.value
+    );
+  } catch (error) {
+    errorMsg.innerText = error.message;
+  }
+};
 
-auth.onAuthStateChanged(user=>{
-  if(user){
-    login.style.display="none";
-    chat.style.display="block";
+window.loginUser = async function() {
+  try {
+    await signInWithEmailAndPassword(
+      auth,
+      email.value,
+      password.value
+    );
+  } catch (error) {
+    errorMsg.innerText = error.message;
+  }
+};
 
-    db.collection("onlineUsers").doc(user.uid).set({
-      email:user.email
+window.logout = async function() {
+  await signOut(auth);
+};
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    loginDiv.style.display = "none";
+    chatDiv.style.display = "block";
+
+    await setDoc(doc(db, "onlineUsers", user.uid), {
+      email: user.email
     });
 
-    db.collection("messages")
-      .orderBy("time")
-      .onSnapshot(snapshot=>{
-        messages.innerHTML="";
-        snapshot.forEach(doc=>{
-          messages.innerHTML += "<p>"+doc.data().text+"</p>";
-        });
-      });
+    const messagesRef = collection(db, "messages");
+    const q = query(messagesRef, orderBy("time"));
 
-    db.collection("onlineUsers")
-      .onSnapshot(snapshot=>{
-        users.innerHTML="";
-        snapshot.forEach(doc=>{
-          users.innerHTML += "<div>"+doc.data().email+" <span class='green-dot'></span></div>";
-        });
+    onSnapshot(q, (snapshot) => {
+      messages.innerHTML = "";
+      snapshot.forEach((doc) => {
+        messages.innerHTML += "<p>" + doc.data().text + "</p>";
       });
+    });
+
+    onSnapshot(collection(db, "onlineUsers"), (snapshot) => {
+      usersList.innerHTML = "";
+      snapshot.forEach((doc) => {
+        usersList.innerHTML += 
+          "<div>" + doc.data().email + 
+          " <span class='green-dot'></span></div>";
+      });
+    });
+
+  } else {
+    loginDiv.style.display = "block";
+    chatDiv.style.display = "none";
   }
 });
 
-function sendMessage(){
-  db.collection("messages").add({
-    text: auth.currentUser.email + ": " + msg.value,
+window.sendMessage = async function() {
+  if(msgInput.value === "") return;
+
+  await addDoc(collection(db, "messages"), {
+    text: auth.currentUser.email + ": " + msgInput.value,
     time: Date.now()
   });
-  msg.value="";
-}
+
+  msgInput.value = "";
+};
+
 </script>
 
 </body>
