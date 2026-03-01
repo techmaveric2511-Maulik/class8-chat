@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Class 8 Private Chat</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background-color: #36393f;
+      color: white;
+    }
+
+    .login, .chat-container {
+      text-align: center;
+      padding: 30px;
+    }
+
+    input {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
+      border: none;
+    }
+
+    button {
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #5865f2;
+      color: white;
+      cursor: pointer;
+    }
+
+    .chat-layout {
+      display: flex;
+      height: 100vh;
+    }
+
+    .sidebar {
+      width: 200px;
+      background-color: #2f3136;
+      padding: 20px;
+    }
+
+    .main-chat {
+      flex: 1;
+      padding: 20px;
+    }
+
+    .admin-panel {
+      margin-top: 20px;
+      background-color: #202225;
+      padding: 10px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login" id="loginPage">
+  <h1>Class 8 Private Discord</h1>
+  <input type="text" id="name" placeholder="Enter Name"><br>
+  <input type="text" id="number" placeholder="Phone Number"><br>
+  <input type="password" id="code" placeholder="Enter Class Code"><br>
+  <button onclick="login()">Join</button>
+</div>
+
+<div class="chat-container" id="chatPage" style="display:none;">
+  <div class="chat-layout">
+    <div class="sidebar">
+      <h3>Private Room</h3>
+      <p>Class 8 Chat</p>
+    </div>
+
+    <div class="main-chat">
+      <h2 id="welcome"></h2>
+
+      <div id="adminControls" class="admin-panel" style="display:none;">
+        <h3>Admin Panel</h3>
+        <button onclick="warnUser()">Give Warning</button>
+        <button onclick="banUser()">Ban User</button>
+        <p id="warningCount"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let warnings = 0;
+let currentUser = "";
+
+function login(){
+  let name = document.getElementById("name").value;
+  let number = document.getElementById("number").value;
+  let code = document.getElementById("code").value;
+
+  if(code !== "CLASS8ONLY"){
+    alert("Access Denied. Class 8 Only!");
+    return;
+  }
+
+  alert("Welcome! A text message has been sent to " + number);
+
+  currentUser = name;
+
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("chatPage").style.display = "block";
+  document.getElementById("welcome").innerText = "Welcome " + name + "!";
+
+  if(name === "Admin" && code === "ADMIN123"){
+    document.getElementById("adminControls").style.display = "block";
+  }
+}
+
+function warnUser(){
+  warnings++;
+  document.getElementById("warningCount").innerText = 
+    "Warnings: " + warnings + "/3";
+
+  if(warnings >= 3){
+    alert("User has been banned.");
+  }
+}
+
+function banUser(){
+  alert("User banned by Admin.");
+}
+</script>
+
+</body>
+</html>
