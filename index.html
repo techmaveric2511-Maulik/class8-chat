@@ -1,71 +1,54 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Class 8 Elite Chat</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galaxy Chat</title>
 <link rel="stylesheet" href="style.css">
-
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 </head>
-
 <body>
 
-<!-- LOGIN -->
-<div id="loginDiv">
-<h2>Class 8 Elite Login</h2>
-<input id="email" placeholder="Email"><br><br>
-<input id="password" type="password" placeholder="Password"><br><br>
-<input type="file" id="profilePic"><br><br>
-<button onclick="register()">Register</button>
-<button onclick="loginUser()">Login</button>
-<p id="errorMsg"></p>
-</div>
+<!-- 🌠 Starfield Background -->
+<canvas id="stars"></canvas>
 
-<!-- CHAT -->
-<div id="chatDiv" style="display:none;">
 <div class="container">
 
-<div class="sidebar">
-<h3 onclick="switchRoom('home')">🏠 Home</h3>
-<h3 onclick="switchRoom('classwork')">📚 Classwork</h3>
-<h3 onclick="switchRoom('doubts')">❓ Doubts</h3>
-<h3 onclick="switchRoom('memes')">😂 Memes</h3>
-<h3 onclick="switchRoom('gamer')">🎮 Gamer</h3>
-<hr>
-<button onclick="openDM()">Private DM</button>
-<button onclick="openProfile()">My Profile</button>
-<button onclick="toggleTheme()">Theme</button>
-<button onclick="goAdmin()">Admin Panel</button>
-<button onclick="logout()">Logout</button>
-</div>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h3 onclick="switchRoom('home')">Home</h3>
+    <h3 onclick="switchRoom('general')">General</h3>
+    <h3 onclick="switchRoom('random')">Random</h3>
+    <button onclick="openDM()">Private DM</button>
+  </div>
 
-<div class="main">
-<div class="chat-header" id="roomTitle">HOME</div>
+  <!-- Main Chat -->
+  <div class="main">
+    <div class="chat-header" id="roomTitle">HOME</div>
+    <div class="messages" id="messages"></div>
 
-<div id="messages" class="messages"></div>
+    <div class="input-area">
+      <input type="text" id="msgInput" placeholder="Type a message...">
+      <!-- Emoji buttons -->
+      <button onclick="addEmoji('😎')">😎</button>
+      <button onclick="addEmoji('🔥')">🔥</button>
+      <button onclick="addEmoji('💀')">💀</button>
+      <button onclick="sendMessage()">Send</button>
+      <button onclick="recordVoice()">🎤</button>
+    </div>
+  </div>
 
-<div class="typing" id="typingIndicator"></div>
-
-<div class="input-area">
-<input id="msgInput" placeholder="Type message" oninput="startTyping()" style="flex:1;">
-<input type="file" onchange="uploadFile(this.files[0])">
-<button onclick="sendMessage()">Send</button>
-</div>
-</div>
-
-<div class="people">
-<h4>Online (<span id="userCount">0</span>)</h4>
-<div id="usersList"></div>
-</div>
+  <!-- People Online -->
+  <div class="people">
+    <h3>Online Users (<span id="userCount">0</span>)</h3>
+    <div id="usersList"></div>
+  </div>
 
 </div>
-</div>
 
-<audio id="notifSound" src="https://actions.google.com/sounds/v1/alarms/notification_alert.ogg"></audio>
-
+<audio id="notifSound" src="notif.mp3"></audio>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
