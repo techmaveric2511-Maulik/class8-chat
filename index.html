@@ -9,20 +9,127 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Segoe UI;
+  background:#1e1f22;
+  color:white;
+}
+
+.container{
+  display:flex;
+  height:100vh;
+}
+
+.sidebar{
+  width:230px;
+  background:#2b2d31;
+  padding:20px;
+}
+
+.sidebar h3{
+  cursor:pointer;
+  padding:8px;
+  border-radius:6px;
+}
+
+.sidebar h3:hover{
+  background:#404249;
+}
+
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  background:#313338;
+}
+
+.chat-header{
+  padding:15px;
+  font-size:20px;
+  background:#232428;
+  border-bottom:1px solid #444;
+}
+
+.messages{
+  flex:1;
+  overflow-y:auto;
+  padding:15px;
+}
+
+.msg{
+  background:#40444b;
+  padding:10px;
+  margin-bottom:10px;
+  border-radius:8px;
+}
+
+.input-area{
+  padding:15px;
+  display:flex;
+  gap:10px;
+  background:#2b2d31;
+}
+
+input{
+  padding:10px;
+  border-radius:6px;
+  border:none;
+}
+
+button{
+  background:#5865f2;
+  color:white;
+  border:none;
+  padding:10px 15px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+button:hover{
+  opacity:0.9;
+}
+
+.people{
+  width:220px;
+  background:#232428;
+  padding:15px;
+}
+
+.green-dot{
+  height:8px;
+  width:8px;
+  background:#43b581;
+  border-radius:50%;
+  display:inline-block;
+}
+
+.profile-pic{
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  vertical-align:middle;
+  margin-right:6px;
+}
+</style>
 </head>
 
 <body>
 
+<!-- LOGIN -->
 <div id="loginDiv">
 <h2>Login</h2>
-<input id="email" placeholder="Email"><br>
-<input id="password" type="password" placeholder="Password"><br>
-<input type="file" id="profilePic"><br>
+<input id="email" placeholder="Email"><br><br>
+<input id="password" type="password" placeholder="Password"><br><br>
+<input type="file" id="profilePic"><br><br>
 <button onclick="register()">Register</button>
 <button onclick="loginUser()">Login</button>
 <p id="errorMsg" style="color:red;"></p>
 </div>
 
+<!-- CHAT -->
 <div id="chatDiv" style="display:none;">
 <div class="container">
 
@@ -36,20 +143,28 @@
 </div>
 
 <div class="main">
-<h2 id="roomTitle">HOME</h2>
+<div class="chat-header" id="roomTitle">HOME</div>
+
 <div id="messages" class="messages"></div>
-<input id="msgInput" placeholder="Type message">
+
+<div class="input-area">
+<input id="msgInput" placeholder="Type message" style="flex:1;">
+<input type="file" onchange="uploadFile(this.files[0])">
 <button onclick="sendMessage()">Send</button>
+</div>
 </div>
 
 <div class="people">
-<h4>Online</h4>
+<h4>Online Users</h4>
 <div id="usersList"></div>
 </div>
 
 </div>
 </div>
 
+<audio id="notifSound" src="https://actions.google.com/sounds/v1/alarms/notification_alert.ogg"></audio>
+
 <script src="app.js"></script>
+
 </body>
 </html>
