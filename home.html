@@ -1,34 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Home - Class 8 Chat</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home - Galaxy Chat</title>
 <link rel="stylesheet" href="style.css">
+</head>
+<body data-room="home">
+
+<canvas id="stars"></canvas>
+
+<div class="container">
+
+  <div class="sidebar">
+    <h3 onclick="switchRoom('home')">🏠 Home</h3>
+    <h3 onclick="switchRoom('classwork')">📚 Classwork</h3>
+    <h3 onclick="switchRoom('doubts')">❓ Doubts</h3>
+    <h3 onclick="switchRoom('memes')">😂 Memes</h3>
+    <h3 onclick="switchRoom('gamer')">🎮 Gamer</h3>
+    <button onclick="openDM()">Private DM</button>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <div class="main">
+    <div class="chat-header" id="roomTitle">HOME</div>
+    <div class="messages" id="messages"></div>
+    <div class="input-area">
+      <input type="text" id="msgInput" placeholder="Type a message...">
+      <button onclick="addEmoji('😎')">😎</button>
+      <button onclick="addEmoji('🔥')">🔥</button>
+      <button onclick="addEmoji('💀')">💀</button>
+      <button onclick="sendMessage()">Send</button>
+      <button onclick="recordVoice()">🎤</button>
+    </div>
+  </div>
+
+  <div class="people">
+    <h3>Online Users (<span id="userCount">0</span>)</h3>
+    <div id="usersList"></div>
+  </div>
+
+</div>
+
+<audio id="notifSound" src="notif.mp3"></audio>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-</head>
-
-<body data-room="home">
-
-<div class="sidebar">
-<h3 onclick="window.location.href='index.html'">🏠 Home</h3>
-<h3 onclick="window.location.href='classwork.html'">📚 Classwork</h3>
-<h3 onclick="window.location.href='doubts.html'">❓ Doubts</h3>
-<h3 onclick="window.location.href='memes.html'">😂 Memes</h3>
-<h3 onclick="window.location.href='gamer.html'">🎮 Gamer</h3>
-</div>
-
-<div class="chat-container">
-<div class="chat-header">HOME</div>
-<div class="messages" id="messages"></div>
-
-<div class="input-area">
-<input id="msgInput" placeholder="Type message">
-<button onclick="sendMessage()">Send</button>
-</div>
-</div>
-
 <script src="app.js"></script>
+
 </body>
 </html>
