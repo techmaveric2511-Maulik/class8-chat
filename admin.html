@@ -1,35 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Admin Dashboard</title>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - Galaxy Chat</title>
 <link rel="stylesheet" href="style.css">
+</head>
+<body data-room="admin">
+
+<canvas id="stars"></canvas>
+
+<div class="container">
+
+  <div class="sidebar">
+    <h3 onclick="window.location.href='index.html'">🏠 Home</h3>
+    <h3 onclick="window.location.href='classwork.html'">📚 Classwork</h3>
+    <h3 onclick="window.location.href='doubts.html'">❓ Doubts</h3>
+    <h3 onclick="window.location.href='memes.html'">😂 Memes</h3>
+    <h3 onclick="window.location.href='gamer.html'">🎮 Gamer</h3>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <div class="main">
+    <div class="chat-header">🔥 Admin Dashboard</div>
+
+    <div id="notAdmin" style="color:red;margin:15px;"></div>
+
+    <div id="adminContent" style="display:none; flex-direction:column; gap:20px; padding:20px;">
+
+      <div class="stats">
+        <h3>Platform Statistics</h3>
+        <p>Total Users: <span id="totalUsers">0</span></p>
+        <p>Total Messages: <span id="totalMessages">0</span></p>
+        <p>Online Users: <span id="onlineUsersCount">0</span></p>
+      </div>
+
+      <div class="banned-users">
+        <h3>Banned Users</h3>
+        <div id="bannedList"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="people">
+    <h3>Online Users (<span id="userCount">0</span>)</h3>
+    <div id="usersList"></div>
+  </div>
+
+</div>
+
+<audio id="notifSound" src="notif.mp3"></audio>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-</head>
-
-<body>
-
-<h2>🔥 Admin Dashboard</h2>
-
-<div id="adminContent" style="display:none;">
-
-<h3>Platform Statistics</h3>
-<p>Total Users: <span id="totalUsers">0</span></p>
-<p>Total Messages: <span id="totalMessages">0</span></p>
-<p>Online Users: <span id="onlineUsersCount">0</span></p>
-
-<hr>
-
-<h3>Banned Users</h3>
-<div id="bannedList"></div>
-
-</div>
-
-<p id="notAdmin" style="color:red;"></p>
-
 <script src="admin.js"></script>
 
 </body>
