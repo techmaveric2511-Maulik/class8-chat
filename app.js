@@ -12,115 +12,119 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-let currentRoom="home";
+let currentRoom = "home";
 
-function register(){
-auth.createUserWithEmailAndPassword(email.value,password.value);
+function register() {
+  auth.createUserWithEmailAndPassword(email.value, password.value);
 }
 
-function loginUser(){
-auth.signInWithEmailAndPassword(email.value,password.value);
+function loginUser() {
+  auth.signInWithEmailAndPassword(email.value, password.value);
 }
 
-function logout(){
-auth.signOut();
+function logout() {
+  auth.signOut();
 }
 
-auth.onAuthStateChanged(user=>{
-if(user){
-loginDiv.style.display="none";
-chatDiv.style.display="block";
+auth.onAuthStateChanged(user => {
+  if (user) {
+    loginDiv.style.display = "none";
+    chatDiv.style.display = "block";
 
-db.collection("onlineUsers").doc(user.uid).set({
-email:user.email
+    db.collection("onlineUsers").doc(user.uid).set({
+      email: user.email
+    });
+
+    loadUsers();
+    loadMessages();
+  }
 });
 
-loadUsers();
-loadMessages();
-}
-});
-
-function switchRoom(room){
-currentRoom=room;
-roomTitle.innerText=room.toUpperCase();
-loadMessages();
+function switchRoom(room) {
+  currentRoom = room;
+  roomTitle.innerText = room.toUpperCase();
+  loadMessages();
 }
 
-function sendMessage(){
-if(msgInput.value==="") return;
+function sendMessage() {
+  if (msgInput.value === "") return;
 
-db.collection("messages").add({
-sender:auth.currentUser.email,
-text:msgInput.value,
-room:currentRoom,
-time:Date.now()
-});
+  db.collection("messages").add({
+    sender: auth.currentUser.email,
+    text: msgInput.value,
+    room: currentRoom,
+    time: Date.now()
+  });
 
-document.getElementById("notifSound").play();
-msgInput.value="";
+  document.getElementById("notifSound").play();
+  msgInput.value = "";
 }
 
-function loadMessages(){
-db.collection("messages")
-.where("room","==",currentRoom)
-.orderBy("time")
-.onSnapshot(snapshot=>{
-messages.innerHTML="";
-snapshot.forEach(doc=>{
-let data=doc.data();
-let div=document.createElement("div");
+function loadMessages() {
+  db.collection("messages")
+    .where("room", "==", currentRoom)
+    .orderBy("time")
+    .onSnapshot(snapshot => {
+      messages.innerHTML = "";
+      snapshot.forEach(doc => {
+        let data = doc.data();
+        let div = document.createElement("div");
 
-div.className="msg "+
-(data.sender===auth.currentUser.email?"self":"other");
+        div.className = "msg " + (data.sender === auth.currentUser.email ? "self" : "other");
 
-div.innerHTML="<b>"+data.sender+"</b><br>"+data.text;
+        div.innerHTML = "<b>" + data.sender + "</b><br>" + data.text;
 
-messages.appendChild(div);
-messages.scrollTop=messages.scrollHeight;
-});
-});
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+      });
+    });
 }
 
-function loadUsers(){
-db.collection("onlineUsers").onSnapshot(snapshot=>{
-usersList.innerHTML="";
-userCount.innerText=snapshot.size;
+function loadUsers() {
+  db.collection("onlineUsers").onSnapshot(snapshot => {
+    usersList.innerHTML = "";
+    userCount.innerText = snapshot.size;
 
-snapshot.forEach(doc=>{
-let div=document.createElement("div");
-div.innerHTML=doc.data().email+
-"<span class='green-dot'></span>";
-usersList.appendChild(div);
-});
-});
+    snapshot.forEach(doc => {
+      let div = document.createElement("div");
+      div.innerHTML = doc.data().email + "<span class='green-dot'></span>";
+      usersList.appendChild(div);
+    });
+  });
 }
+
+// Utility function for adding emojis
+function addEmoji(emoji) {
+  msgInput.value += emoji;
+}
+
 // 🌠 STARFIELD ANIMATION
-const canvas=document.getElementById("stars");
-const ctx=canvas.getContext("2d");
+const canvas = document.getElementById("stars");
+const ctx = canvas.getContext("2d");
 
-canvas.width=window.innerWidth;
-canvas.height=window.innerHeight;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-let stars=[];
-for(let i=0;i<200;i++){
-stars.push({
-x:Math.random()*canvas.width,
-y:Math.random()*canvas.height,
-size:Math.random()*2
-});
+let stars = [];
+for (let i = 0; i < 200; i++) {
+  stars.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    size: Math.random() * 2
+  });
 }
 
-function animateStars(){
-ctx.clearRect(0,0,canvas.width,canvas.height);
-ctx.fillStyle="white";
-stars.forEach(s=>{
-ctx.beginPath();
-ctx.arc(s.x,s.y,s.size,0,Math.PI*2);
-ctx.fill();
-s.y+=0.5;
-if(s.y>canvas.height) s.y=0;
-});
-requestAnimationFrame(animateStars);
+function animateStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "white";
+  stars.forEach(s => {
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+    ctx.fill();
+    s.y += 0.5;
+    if (s.y > canvas.height) s.y = 0;
+  });
+  requestAnimationFrame(animateStars);
 }
 
 animateStars();
