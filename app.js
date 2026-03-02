@@ -1,4 +1,3 @@
-// YOUR FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyArbnk6rVI_wRPQibYx1DRKUlEJr19JQ_w",
   authDomain: "class8-discord-acfcf.firebaseapp.com",
@@ -15,31 +14,28 @@ const db = firebase.firestore();
 const storage = firebase.storage();
 
 const ADMIN_EMAIL = "techmaveric2511@gmail.com";
-
 let currentRoom="home";
 
-const bannedWords=["badword1","badword2"];
-
-// REGISTER
+// ================= LOGIN / REGISTER =================
 function register(){
-const email=email.value;
-const pass=password.value;
-auth.createUserWithEmailAndPassword(email,pass)
+auth.createUserWithEmailAndPassword(email.value,password.value)
 .then(user=>{
 db.collection("users").doc(user.user.uid).set({
-email:email,
-role: email===ADMIN_EMAIL ? "admin":"student",
-warnings:0
+email:email.value,
+role: email.value===ADMIN_EMAIL ? "admin":"student"
 });
 });
 }
 
-// LOGIN
 function loginUser(){
 auth.signInWithEmailAndPassword(email.value,password.value);
 }
 
-// AUTH
+function logout(){
+auth.signOut();
+}
+
+// ================= AUTH =================
 auth.onAuthStateChanged(user=>{
 if(user){
 loginDiv.style.display="none";
@@ -49,25 +45,25 @@ db.collection("onlineUsers").doc(user.uid).set({
 email:user.email
 });
 
-loadMessages();
 loadUsers();
+loadMessages();
 }
 });
 
-// SEND MESSAGE
-function sendMessage(){
-let msg=msgInput.value;
+// ================= ROOM SWITCH =================
+function switchRoom(room){
+currentRoom=room;
+roomTitle.innerText=room.toUpperCase();
+loadMessages();
+}
 
-for(let word of bannedWords){
-if(msg.includes(word)){
-alert("Bad word detected!");
-return;
-}
-}
+// ================= SEND MESSAGE =================
+function sendMessage(){
+if(msgInput.value==="") return;
 
 db.collection("messages").add({
 sender:auth.currentUser.email,
-text:msg,
+text:msgInput.value,
 room:currentRoom,
 time:Date.now()
 });
@@ -75,7 +71,7 @@ time:Date.now()
 msgInput.value="";
 }
 
-// LOAD MESSAGES
+// ================= LOAD MESSAGES =================
 function loadMessages(){
 db.collection("messages")
 .where("room","==",currentRoom)
@@ -85,18 +81,19 @@ messages.innerHTML="";
 snapshot.forEach(doc=>{
 let data=doc.data();
 let div=document.createElement("div");
-div.className="msg";
 
-let time=new Date(data.time).toLocaleTimeString();
+div.className="msg " + 
+(data.sender===auth.currentUser.email ? "self":"other");
 
-div.innerHTML="<b>"+data.sender+"</b> <small>"+time+"</small>: "+data.text;
+div.innerHTML="<b>"+data.sender+"</b><br>"+data.text;
 
 messages.appendChild(div);
+messages.scrollTop=messages.scrollHeight;
 });
 });
 }
 
-// USERS
+// ================= USERS =================
 function loadUsers(){
 db.collection("onlineUsers").onSnapshot(snapshot=>{
 usersList.innerHTML="";
@@ -104,20 +101,14 @@ userCount.innerText=snapshot.size;
 
 snapshot.forEach(doc=>{
 let div=document.createElement("div");
-div.innerHTML=doc.data().email+" <span class='green-dot'></span>";
+div.innerHTML=doc.data().email+
+"<span class='green-dot'></span>";
 usersList.appendChild(div);
 });
 });
 }
 
-// THEME
+// ================= THEME =================
 function toggleTheme(){
 document.body.classList.toggle("light");
-}
-
-// ADMIN PAGE
-function goAdmin(){
-if(auth.currentUser.email===ADMIN_EMAIL){
-window.location="admin.html";
-}
 }
