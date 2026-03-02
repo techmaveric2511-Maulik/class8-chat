@@ -12,20 +12,32 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// ===== ROOM DETECTION =====
-let currentRoom = document.body.dataset.room || "home";
-
 // ===== ELEMENTS =====
 const messages = document.getElementById("messages");
 const msgInput = document.getElementById("msgInput");
+const usersList = document.getElementById("usersList");
+const userCount = document.getElementById("userCount");
 
-// ===== AUTH STATE =====
-auth.onAuthStateChanged(user => {
+// ===== CURRENT ROOM =====
+let currentRoom = document.body.dataset.room || "home";
+
+// ===== AUTH CHECK & BANNED USER BLOCK =====
+auth.onAuthStateChanged(async user => {
   if (!user) {
-    // redirect to login page if not logged in
     window.location = "index.html";
     return;
   }
+
+  // Check if banned
+  const bannedDoc = await db.collection("bannedUsers").doc(user.uid).get();
+  if (bannedDoc.exists) {
+    alert("You are banned from this chat!");
+    auth.signOut();
+    return;
+  }
+
+  // Add to online users
+  db.collection("onlineUsers").doc(user.uid).set({ email: user.email });
 
   loadMessages();
   loadUsers();
@@ -35,15 +47,27 @@ auth.onAuthStateChanged(user => {
 function sendMessage() {
   if (!msgInput || msgInput.value.trim() === "") return;
 
-  db.collection("messages").add({
-    sender: auth.currentUser.email,
-    text: msgInput.value,
-    room: currentRoom,
-    time: Date.now()
-  });
+  const user = auth.currentUser;
+  if (!user) return;
 
-  document.getElementById("notifSound")?.play();
-  msgInput.value = "";
+  // Check if banned before sending
+  db.collection("bannedUsers").doc(user.uid).get().then(doc => {
+    if (doc.exists) {
+      alert("You are banned and cannot send messages.");
+      msgInput.value = "";
+      return;
+    }
+
+    db.collection("messages").add({
+      sender: user.email,
+      text: msgInput.value,
+      room: currentRoom,
+      time: Date.now()
+    });
+
+    document.getElementById("notifSound")?.play();
+    msgInput.value = "";
+  });
 }
 
 // ===== LOAD MESSAGES =====
@@ -68,17 +92,83 @@ function loadMessages() {
 
 // ===== LOAD ONLINE USERS =====
 function loadUsers() {
-  const usersList = document.getElementById("usersList");
-  const userCount = document.getElementById("userCount");
   if (!usersList || !userCount) return;
 
   db.collection("onlineUsers").onSnapshot(snapshot => {
     usersList.innerHTML = "";
     userCount.innerText = snapshot.size;
+
     snapshot.forEach(doc => {
       const div = document.createElement("div");
       div.innerHTML = doc.data().email + "<span class='green-dot'></span>";
       usersList.appendChild(div);
     });
   });
+}
+
+// ===== ADD EMOJI =====
+function addEmoji(emoji) {
+  if (msgInput) msgInput.value += emoji;
+}
+
+// ===== PRIVATE DM =====
+function openDM() {
+  let userEmail = prompt("Enter email to DM:");
+  if (!userEmail) return;
+
+  currentRoom = "DM_" + auth.currentUser.email + "_" + userEmail;
+  const roomTitle = document.getElementById("roomTitle");
+  if (roomTitle) roomTitle.innerText = "DM with " + userEmail;
+
+  loadMessages();
+}
+
+// ===== VOICE RECORDING (placeholder) =====
+function recordVoice() {
+  alert("Voice feature coming next upgrade 😈");
+}
+
+// ===== ROOM SWITCHING (for index.html sidebar) =====
+function switchRoom(room) {
+  currentRoom = room;
+  const roomTitle = document.getElementById("roomTitle");
+  if (roomTitle) roomTitle.innerText = room.toUpperCase();
+  loadMessages();
+}
+
+// ===== LOGOUT =====
+function logout() {
+  const user = auth.currentUser;
+  if (user) {
+    db.collection("onlineUsers").doc(user.uid).delete();
+    auth.signOut();
+    window.location = "index.html";
+  }
+}
+
+// ===== STARFIELD ANIMATION (optional, index.html only) =====
+const canvas = document.getElementById("stars");
+if (canvas) {
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  let stars = [];
+  for (let i = 0; i < 200; i++) {
+    stars.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 2 });
+  }
+
+  function animateStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "white";
+    stars.forEach(s => {
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+      ctx.fill();
+      s.y += 0.5;
+      if (s.y > canvas.height) s.y = 0;
+    });
+    requestAnimationFrame(animateStars);
+  }
+  animateStars();
 }
