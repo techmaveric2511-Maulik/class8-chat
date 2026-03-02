@@ -11,20 +11,11 @@ firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 const db = firebase.firestore();
-const storage = firebase.storage();
 
-const ADMIN_EMAIL = "techmaveric2511@gmail.com";
 let currentRoom="home";
 
-// ================= LOGIN / REGISTER =================
 function register(){
-auth.createUserWithEmailAndPassword(email.value,password.value)
-.then(user=>{
-db.collection("users").doc(user.user.uid).set({
-email:email.value,
-role: email.value===ADMIN_EMAIL ? "admin":"student"
-});
-});
+auth.createUserWithEmailAndPassword(email.value,password.value);
 }
 
 function loginUser(){
@@ -35,7 +26,6 @@ function logout(){
 auth.signOut();
 }
 
-// ================= AUTH =================
 auth.onAuthStateChanged(user=>{
 if(user){
 loginDiv.style.display="none";
@@ -50,14 +40,12 @@ loadMessages();
 }
 });
 
-// ================= ROOM SWITCH =================
 function switchRoom(room){
 currentRoom=room;
 roomTitle.innerText=room.toUpperCase();
 loadMessages();
 }
 
-// ================= SEND MESSAGE =================
 function sendMessage(){
 if(msgInput.value==="") return;
 
@@ -68,10 +56,10 @@ room:currentRoom,
 time:Date.now()
 });
 
+document.getElementById("notifSound").play();
 msgInput.value="";
 }
 
-// ================= LOAD MESSAGES =================
 function loadMessages(){
 db.collection("messages")
 .where("room","==",currentRoom)
@@ -82,8 +70,8 @@ snapshot.forEach(doc=>{
 let data=doc.data();
 let div=document.createElement("div");
 
-div.className="msg " + 
-(data.sender===auth.currentUser.email ? "self":"other");
+div.className="msg "+
+(data.sender===auth.currentUser.email?"self":"other");
 
 div.innerHTML="<b>"+data.sender+"</b><br>"+data.text;
 
@@ -93,7 +81,6 @@ messages.scrollTop=messages.scrollHeight;
 });
 }
 
-// ================= USERS =================
 function loadUsers(){
 db.collection("onlineUsers").onSnapshot(snapshot=>{
 usersList.innerHTML="";
@@ -106,9 +93,4 @@ div.innerHTML=doc.data().email+
 usersList.appendChild(div);
 });
 });
-}
-
-// ================= THEME =================
-function toggleTheme(){
-document.body.classList.toggle("light");
 }
