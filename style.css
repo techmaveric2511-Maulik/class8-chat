@@ -1,168 +1,168 @@
 /* ===== GALAXY BACKGROUND ===== */
 body{
-margin:0;
-font-family:'Segoe UI',sans-serif;
-color:white;
-background:black;
-overflow:hidden;
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  color:white;
+  background:black;
+  overflow:hidden;
 }
 
 /* STAR CANVAS */
 #stars{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-z-index:-1;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  z-index:-1;
 }
 
 /* CONTAINER */
 .container{
-display:flex;
-height:100vh;
-backdrop-filter:blur(10px);
+  display:flex;
+  height:100vh;
+  backdrop-filter:blur(10px);
 }
 
 /* SIDEBAR */
 .sidebar{
-width:260px;
-background:rgba(10,10,30,0.8);
-padding:20px;
-display:flex;
-flex-direction:column;
-gap:12px;
-border-right:2px solid #8f00ff;
-box-shadow:0 0 20px #8f00ff;
+  width:260px;
+  background:rgba(10,10,30,0.8);
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  border-right:2px solid #8f00ff;
+  box-shadow:0 0 20px #8f00ff;
 }
 
 .sidebar h3{
-padding:12px;
-border-radius:12px;
-cursor:pointer;
-transition:0.3s;
+  padding:12px;
+  border-radius:12px;
+  cursor:pointer;
+  transition:0.3s;
 }
 
 .sidebar h3:hover{
-background:#8f00ff33;
-box-shadow:0 0 15px #8f00ff;
-transform:scale(1.05);
+  background:#8f00ff33;
+  box-shadow:0 0 15px #8f00ff;
+  transform:scale(1.05);
 }
 
 /* CHAT */
 .main{
-flex:1;
-display:flex;
-flex-direction:column;
+  flex:1;
+  display:flex;
+  flex-direction:column;
 }
 
 .chat-header{
-padding:18px;
-font-size:24px;
-font-weight:bold;
-background:rgba(0,0,40,0.8);
-border-bottom:2px solid #00ffff;
-text-shadow:0 0 10px #00ffff;
+  padding:18px;
+  font-size:24px;
+  font-weight:bold;
+  background:rgba(0,0,40,0.8);
+  border-bottom:2px solid #00ffff;
+  text-shadow:0 0 10px #00ffff;
 }
 
 /* MESSAGES */
 .messages{
-flex:1;
-overflow-y:auto;
-padding:25px;
-display:flex;
-flex-direction:column;
-gap:18px;
+  flex:1;
+  overflow-y:auto;
+  padding:25px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
 }
 
 .msg{
-padding:15px 20px;
-border-radius:20px;
-max-width:65%;
-animation:fadeIn 0.3s ease-in-out;
-position:relative;
+  padding:15px 20px;
+  border-radius:20px;
+  max-width:65%;
+  animation:fadeIn 0.3s ease-in-out;
+  position:relative;
 }
 
 .msg.self{
-align-self:flex-end;
-background:linear-gradient(45deg,#ff00cc,#3333ff);
-box-shadow:0 0 20px #ff00cc;
+  align-self:flex-end;
+  background:linear-gradient(45deg,#ff00cc,#3333ff);
+  box-shadow:0 0 20px #ff00cc;
 }
 
 .msg.other{
-align-self:flex-start;
-background:linear-gradient(45deg,#00ffff,#0066ff);
-color:black;
-box-shadow:0 0 20px #00ffff;
+  align-self:flex-start;
+  background:linear-gradient(45deg,#00ffff,#0066ff);
+  color:black;
+  box-shadow:0 0 20px #00ffff;
 }
 
 .msg img{
-max-width:220px;
-border-radius:15px;
-margin-top:8px;
+  max-width:220px;
+  border-radius:15px;
+  margin-top:8px;
 }
 
 @keyframes fadeIn{
-from{opacity:0;transform:translateY(10px)}
-to{opacity:1;transform:translateY(0)}
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
 }
 
 /* INPUT */
 .input-area{
-display:flex;
-padding:18px;
-gap:10px;
-background:rgba(0,0,40,0.9);
-border-top:2px solid #ff00cc;
+  display:flex;
+  padding:18px;
+  gap:10px;
+  background:rgba(0,0,40,0.9);
+  border-top:2px solid #ff00cc;
 }
 
 input{
-flex:1;
-padding:12px;
-border-radius:30px;
-border:none;
-background:#111;
-color:white;
-outline:none;
+  flex:1;
+  padding:12px;
+  border-radius:30px;
+  border:none;
+  background:#111;
+  color:white;
+  outline:none;
 }
 
 button{
-padding:12px 18px;
-border-radius:30px;
-border:none;
-background:#8f00ff;
-color:white;
-cursor:pointer;
-transition:0.3s;
+  padding:12px 18px;
+  border-radius:30px;
+  border:none;
+  background:#8f00ff;
+  color:white;
+  cursor:pointer;
+  transition:0.3s;
 }
 
 button:hover{
-box-shadow:0 0 20px #8f00ff;
-transform:scale(1.1);
+  box-shadow:0 0 20px #8f00ff;
+  transform:scale(1.1);
 }
 
 /* PEOPLE */
 .people{
-width:230px;
-background:rgba(10,10,30,0.8);
-padding:20px;
-border-left:2px solid #00ffff;
-box-shadow:0 0 20px #00ffff;
+  width:230px;
+  background:rgba(10,10,30,0.8);
+  padding:20px;
+  border-left:2px solid #00ffff;
+  box-shadow:0 0 20px #00ffff;
 }
 
 .green-dot{
-height:10px;
-width:10px;
-background:#00ff88;
-border-radius:50%;
-display:inline-block;
-margin-left:8px;
-box-shadow:0 0 15px #00ff88;
-animation:pulse 1.5s infinite;
+  height:10px;
+  width:10px;
+  background:#00ff88;
+  border-radius:50%;
+  display:inline-block;
+  margin-left:8px;
+  box-shadow:0 0 15px #00ff88;
+  animation:pulse 1.5s infinite;
 }
 
 @keyframes pulse{
-0%{opacity:1}
-50%{opacity:0.3}
-100%{opacity:1}
+  0%{opacity:1}
+  50%{opacity:0.3}
+  100%{opacity:1}
 }
