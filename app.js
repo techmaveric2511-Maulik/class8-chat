@@ -1,3 +1,4 @@
+// ===== FIREBASE CONFIG =====
 const firebaseConfig = {
   apiKey: "AIzaSyArbnk6rVI_wRPQibYx1DRKUlEJr19JQ_w",
   authDomain: "class8-discord-acfcf.firebaseapp.com",
@@ -8,12 +9,12 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-
 const auth = firebase.auth();
 const db = firebase.firestore();
 
 let currentRoom = "home";
 
+// ===== AUTH FUNCTIONS =====
 function register() {
   auth.createUserWithEmailAndPassword(email.value, password.value);
 }
@@ -40,6 +41,7 @@ auth.onAuthStateChanged(user => {
   }
 });
 
+// ===== CHAT ROOM FUNCTIONS =====
 function switchRoom(room) {
   currentRoom = room;
   roomTitle.innerText = room.toUpperCase();
@@ -69,11 +71,8 @@ function loadMessages() {
       snapshot.forEach(doc => {
         let data = doc.data();
         let div = document.createElement("div");
-
         div.className = "msg " + (data.sender === auth.currentUser.email ? "self" : "other");
-
         div.innerHTML = "<b>" + data.sender + "</b><br>" + data.text;
-
         messages.appendChild(div);
         messages.scrollTop = messages.scrollHeight;
       });
@@ -93,12 +92,26 @@ function loadUsers() {
   });
 }
 
-// Utility function for adding emojis
+// ===== UTILITY =====
 function addEmoji(emoji) {
   msgInput.value += emoji;
 }
 
-// 🌠 STARFIELD ANIMATION
+// ===== PRIVATE DM =====
+function openDM() {
+  let user = prompt("Enter email to DM:");
+  if (!user) return;
+  currentRoom = "DM_" + auth.currentUser.email + "_" + user;
+  roomTitle.innerText = "DM with " + user;
+  loadMessages();
+}
+
+// ===== VOICE RECORDING (Placeholder) =====
+function recordVoice() {
+  alert("Voice feature coming next upgrade 😈");
+}
+
+// ===== STARFIELD ANIMATION =====
 const canvas = document.getElementById("stars");
 const ctx = canvas.getContext("2d");
 
@@ -107,11 +120,7 @@ canvas.height = window.innerHeight;
 
 let stars = [];
 for (let i = 0; i < 200; i++) {
-  stars.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    size: Math.random() * 2
-  });
+  stars.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 2 });
 }
 
 function animateStars() {
@@ -126,5 +135,4 @@ function animateStars() {
   });
   requestAnimationFrame(animateStars);
 }
-
 animateStars();
