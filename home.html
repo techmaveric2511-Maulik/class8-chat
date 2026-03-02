@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Home - Class 8 Chat</title>
+<link rel="stylesheet" href="style.css">
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+
+<body data-room="home">
+
+<div class="sidebar">
+<h3 onclick="window.location.href='index.html'">🏠 Home</h3>
+<h3 onclick="window.location.href='classwork.html'">📚 Classwork</h3>
+<h3 onclick="window.location.href='doubts.html'">❓ Doubts</h3>
+<h3 onclick="window.location.href='memes.html'">😂 Memes</h3>
+<h3 onclick="window.location.href='gamer.html'">🎮 Gamer</h3>
+</div>
+
+<div class="chat-container">
+<div class="chat-header">HOME</div>
+<div class="messages" id="messages"></div>
+
+<div class="input-area">
+<input id="msgInput" placeholder="Type message">
+<button onclick="sendMessage()">Send</button>
+</div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
