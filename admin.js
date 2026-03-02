@@ -1,20 +1,3 @@
-// ===== FIREBASE CONFIG =====
-const firebaseConfig = {
-  apiKey: "AIzaSyArbnk6rVI_wRPQibYx1DRKUlEJr19JQ_w",
-  authDomain: "class8-discord-acfcf.firebaseapp.com",
-  projectId: "class8-discord-acfcf",
-  storageBucket: "class8-discord-acfcf.appspot.com",
-  messagingSenderId: "1017298929493",
-  appId: "1:1017298929493:web:15c30c79b46a020dbbd1dc"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-const ADMIN_EMAIL = "techmaveric2511@gmail.com";
-
-// ===== WAIT FOR DOM =====
 document.addEventListener("DOMContentLoaded", () => {
 
   const notAdmin = document.getElementById("notAdmin");
@@ -23,8 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const totalMessagesEl = document.getElementById("totalMessages");
   const onlineUsersCountEl = document.getElementById("onlineUsersCount");
   const bannedListEl = document.getElementById("bannedList");
+  const usersList = document.getElementById("usersList");
+  const userCount = document.getElementById("userCount");
 
-  // ===== AUTH CHECK =====
   auth.onAuthStateChanged(user => {
     if(!user){
       window.location="index.html";
@@ -48,17 +32,15 @@ document.addEventListener("DOMContentLoaded", () => {
     db.collection("users").get().then(snapshot=>{
       totalUsersEl.innerText = snapshot.size;
     });
-
     db.collection("messages").get().then(snapshot=>{
       totalMessagesEl.innerText = snapshot.size;
     });
-
     db.collection("onlineUsers").onSnapshot(snapshot=>{
       onlineUsersCountEl.innerText = snapshot.size;
     });
   }
 
-  // ===== BANNED USERS =====
+  // ===== LOAD BANNED USERS =====
   function loadBannedUsers(){
     db.collection("bannedUsers").onSnapshot(snapshot=>{
       bannedListEl.innerHTML="";
@@ -70,21 +52,56 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ===== ONLINE USERS IN SIDEBAR =====
+  // ===== LOAD ONLINE USERS WITH BAN BUTTON =====
   function loadOnlineUsersSidebar(){
-    const usersList = document.getElementById("usersList");
-    const userCount = document.getElementById("userCount");
     if(!usersList || !userCount) return;
 
     db.collection("onlineUsers").onSnapshot(snapshot=>{
       usersList.innerHTML="";
       userCount.innerText = snapshot.size;
+
       snapshot.forEach(doc=>{
-        const div = document.createElement("div");
-        div.innerHTML = doc.data().email + "<span class='green-dot'></span>";
-        usersList.appendChild(div);
+        const userEmail = doc.data().email;
+        const userDiv = document.createElement("div");
+        userDiv.style.display = "flex";
+        userDiv.style.justifyContent = "space-between";
+        userDiv.style.alignItems = "center";
+        userDiv.style.marginBottom = "6px";
+
+        const emailSpan = document.createElement("span");
+        emailSpan.innerText = userEmail;
+
+        const banBtn = document.createElement("button");
+        banBtn.innerText = "Ban";
+        banBtn.style.background = "#ff3333";
+        banBtn.style.color = "white";
+        banBtn.style.padding = "4px 8px";
+        banBtn.style.borderRadius = "8px";
+        banBtn.style.border = "none";
+        banBtn.style.cursor = "pointer";
+        banBtn.onclick = () => banUser(userEmail, doc.id);
+
+        userDiv.appendChild(emailSpan);
+        userDiv.appendChild(banBtn);
+        usersList.appendChild(userDiv);
       });
     });
+  }
+
+  // ===== BAN USER FUNCTION =====
+  async function banUser(email, uid){
+    if(!confirm(`Are you sure you want to ban ${email}?`)) return;
+
+    try{
+      // Add to bannedUsers collection
+      await db.collection("bannedUsers").doc(uid).set({email: email});
+      // Remove from onlineUsers
+      await db.collection("onlineUsers").doc(uid).delete();
+      alert(`${email} has been banned successfully.`);
+    }catch(err){
+      console.error(err);
+      alert("Error banning user: "+err.message);
+    }
   }
 
   // ===== LOGOUT =====
