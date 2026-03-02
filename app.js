@@ -9,92 +9,51 @@ firebase.initializeApp(firebaseConfig);
 
 const auth=firebase.auth();
 const db=firebase.firestore();
-const storage=firebase.storage();
 
 let currentRoom="home";
-let currentUserData=null;
-
-/* ---------------- ROLE SYSTEM ---------------- */
-
+let currentUserRole="student";
 const ADMIN_EMAIL="yourrealemail@gmail.com";
 
-function assignRole(user){
-  let role="student";
-  if(user.email===ADMIN_EMAIL){
-    role="admin";
-  }
-
-  db.collection("users").doc(user.uid).set({
-    email:user.email,
-    role:role,
-    photo:""
-  },{merge:true});
-}
-
-/* ---------------- REGISTER ---------------- */
-
-function register(){
-  auth.createUserWithEmailAndPassword(email.value,password.value)
-  .then(cred=>{
-    assignRole(cred.user);
-  })
-  .catch(e=>errorMsg.innerText=e.message);
-}
-
-function loginUser(){
-  auth.signInWithEmailAndPassword(email.value,password.value)
-  .catch(e=>errorMsg.innerText=e.message);
-}
-
-function logout(){
-  auth.signOut();
-}
-
-/* ---------------- AUTH ---------------- */
-
+/* AUTH */
 auth.onAuthStateChanged(user=>{
   if(user){
-    loginDiv.style.display="none";
-    chatDiv.style.display="block";
-
-    db.collection("users").doc(user.uid).get().then(doc=>{
-      currentUserData=doc.data();
-    });
-
+    assignRole(user);
     loadMessages();
     loadUsers();
-    enableNotifications();
-
   }else{
-    loginDiv.style.display="block";
-    chatDiv.style.display="none";
+    window.location.reload();
   }
 });
 
-/* ---------------- ROOMS ---------------- */
+function assignRole(user){
+  if(user.email===ADMIN_EMAIL){
+    currentUserRole="admin";
+  }
+}
 
+/* ROOM SWITCH */
 function switchRoom(room){
   currentRoom=room;
   roomTitle.innerText=room.toUpperCase();
   loadMessages();
 }
 
-/* ---------------- MESSAGES ---------------- */
-
+/* SEND MESSAGE */
 function sendMessage(){
   if(msgInput.value==="") return;
 
   db.collection("messages").add({
-    email:auth.currentUser.email,
     text:msgInput.value,
+    email:auth.currentUser.email,
     room:currentRoom,
     time:Date.now(),
-    reactions:{}
+    seen:false
   });
 
   msgInput.value="";
 }
 
+/* LOAD MESSAGES */
 function loadMessages(){
   db.collection("messages")
   .where("room","==",currentRoom)
@@ -104,100 +63,59 @@ function loadMessages(){
     snapshot.forEach(doc=>{
       let data=doc.data();
       let div=document.createElement("div");
-      div.className="msg";
+      div.className="message";
 
-      div.innerHTML="<strong>"+data.email+"</strong>: "+data.text;
+      let content=document.createElement("div");
+      content.className="message-content";
+      content.innerHTML="<strong>"+data.email+"</strong><br>"+data.text;
 
-      /* Emoji reaction */
-      let react=document.createElement("button");
-      react.innerText="😀";
-      react.onclick=()=>addReaction(doc.id);
-      div.appendChild(react);
+      /* EDIT */
+      if(data.email===auth.currentUser.email){
+        let editBtn=document.createElement("button");
+        editBtn.innerText="Edit";
+        editBtn.onclick=()=>{
+          let newText=prompt("Edit message:",data.text);
+          if(newText){
+            db.collection("messages").doc(doc.id).update({text:newText});
+          }
+        };
+        content.appendChild(editBtn);
+      }
 
+      /* DELETE (ADMIN OR OWNER) */
+      if(currentUserRole==="admin" || data.email===auth.currentUser.email){
+        let delBtn=document.createElement("button");
+        delBtn.innerText="Delete";
+        delBtn.onclick=()=>{
+          db.collection("messages").doc(doc.id).delete();
+        };
+        content.appendChild(delBtn);
+      }
+
+      div.appendChild(content);
       messages.appendChild(div);
-
-      showPopup("New message from "+data.email);
     });
   });
 }
 
-function addReaction(id){
-  db.collection("messages").doc(id).update({
-    reactions:firebase.firestore.FieldValue.increment(1)
-  });
-}
-
-/* ---------------- PRIVATE DM ---------------- */
-
-function sendPrivateMessage(toUID,text){
-  db.collection("privateMessages").add({
-    from:auth.currentUser.uid,
-    to:toUID,
-    text:text,
-    time:Date.now()
-  });
-}
-
-/* ---------------- USERS LIST ---------------- */
-
+/* USERS LIST */
 function loadUsers(){
-  db.collection("users").onSnapshot(snapshot=>{
+  db.collection("messages").onSnapshot(snapshot=>{
+    let users=new Set();
+    snapshot.forEach(doc=>users.add(doc.data().email));
+
     usersList.innerHTML="";
-    snapshot.forEach(doc=>{
-      let data=doc.data();
+    users.forEach(email=>{
       let div=document.createElement("div");
-
-      let roleBadge="";
-      if(data.role==="admin") roleBadge="👑";
-      if(data.role==="moderator") roleBadge="🛡";
-
-      div.innerHTML=roleBadge+" "+data.email;
-
-      div.onclick=()=>{
-        let msg=prompt("Send private message:");
-        if(msg) sendPrivateMessage(doc.id,msg);
-      };
-
+      div.innerText=email;
+      if(email===ADMIN_EMAIL){
+        div.className="role-admin";
+      }
       usersList.appendChild(div);
     });
   });
 }
 
-/* ---------------- TYPING INDICATOR ---------------- */
-
-msgInput.addEventListener("input",()=>{
-  db.collection("typing").doc(auth.currentUser.uid).set({
-    room:currentRoom,
-    typing:true
-  });
-});
-
-/* ---------------- FILE SHARING ---------------- */
-
-function uploadFile(file){
-  let ref=storage.ref("files/"+Date.now()+"_"+file.name);
-  ref.put(file).then(()=>{
-    ref.getDownloadURL().then(url=>{
-      db.collection("messages").add({
-        email:auth.currentUser.email,
-        text:"📎 File: "+url,
-        room:currentRoom,
-        time:Date.now()
-      });
-    });
-  });
-}
-
-/* ---------------- POPUP NOTIFICATIONS ---------------- */
-
-function showPopup(text){
-  popupNotif.innerText=text;
-  popupNotif.style.display="block";
-  setTimeout(()=>popupNotif.style.display="none",3000);
-}
-
-function enableNotifications(){
-  if("Notification" in window){
-    Notification.requestPermission();
-  }
+function logout(){
+  auth.signOut();
 }
