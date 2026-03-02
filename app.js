@@ -17,14 +17,15 @@ const messages = document.getElementById("messages");
 const msgInput = document.getElementById("msgInput");
 const usersList = document.getElementById("usersList");
 const userCount = document.getElementById("userCount");
+const notifSound = document.getElementById("notifSound");
 
 // ===== CURRENT ROOM =====
 let currentRoom = document.body.dataset.room || "home";
 
-// ===== AUTH CHECK & BANNED USER BLOCK =====
+// ===== AUTH STATE & BANNED CHECK =====
 auth.onAuthStateChanged(async user => {
   if (!user) {
-    window.location = "index.html";
+    window.location = "index.html"; // redirect if not logged in
     return;
   }
 
@@ -39,6 +40,7 @@ auth.onAuthStateChanged(async user => {
   // Add to online users
   db.collection("onlineUsers").doc(user.uid).set({ email: user.email });
 
+  // Load messages & online users
   loadMessages();
   loadUsers();
 });
@@ -65,7 +67,7 @@ function sendMessage() {
       time: Date.now()
     });
 
-    document.getElementById("notifSound")?.play();
+    notifSound?.play();
     msgInput.value = "";
   });
 }
@@ -133,10 +135,7 @@ function switchRoom(room) {
   currentRoom = room;
   const roomTitle = document.getElementById("roomTitle");
   if (roomTitle) roomTitle.innerText = room.toUpperCase();
-  loadMessages();
-}
-
-// ===== LOGOUT =====
+  loadMessages()====
 function logout() {
   const user = auth.currentUser;
   if (user) {
@@ -146,7 +145,7 @@ function logout() {
   }
 }
 
-// ===== STARFIELD ANIMATION (optional, index.html only) =====
+// ===== STARFIELD ANIMATION (optional for index.html) =====
 const canvas = document.getElementById("stars");
 if (canvas) {
   const ctx = canvas.getContext("2d");
